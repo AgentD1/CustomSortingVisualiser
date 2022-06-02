@@ -1,13 +1,12 @@
 import java.util.*;
-import java.util.concurrent.locks.Condition;
 
-public class SortingList<E> implements List<E> {
-	List<E> underlyingList = new ArrayList<>();
+public class SortingList implements List<Integer> {
+	public List<Integer> underlyingList = new ArrayList<>();
 	
-	Condition continueSortCondition;
+	SortingPanel panel;
 	
-	public SortingList(Condition condition) {
-		continueSortCondition = condition;
+	public SortingList(SortingPanel panel) {
+		this.panel = panel;
 	}
 	
 	@Override
@@ -26,7 +25,7 @@ public class SortingList<E> implements List<E> {
 	}
 	
 	@Override
-	public Iterator<E> iterator() {
+	public Iterator<Integer> iterator() {
 		return underlyingList.iterator();
 	}
 	
@@ -43,20 +42,40 @@ public class SortingList<E> implements List<E> {
 	}
 	
 	@Override
-	public boolean add(E e) {
-		// TODO: add right thing
+	public boolean add(Integer e) {
+		panel.nextOperationLock.lock();
 		try {
-			continueSortCondition.await();
+			panel.operationReady.set(true);
+			panel.operation.set(new SortOperation.AddPoint(underlyingList.size(), (int)e));
+			
+			panel.continueSortCondition.await();
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
+		} finally {
+			panel.nextOperationLock.unlock();
 		}
+		
 		underlyingList.add(e);
 		return true;
 	}
 	
 	@Override
 	public boolean remove(Object o) {
-		// TODO: add the thing
+		int index = underlyingList.indexOf(o);
+		if(index == -1) return false;
+		
+		panel.nextOperationLock.lock();
+		try {
+			panel.operationReady.set(true);
+			panel.operation.set(new SortOperation.RemovePoint(index));
+			
+			panel.continueSortCondition.await();
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		} finally {
+			panel.nextOperationLock.unlock();
+		}
+		
 		return underlyingList.remove(o);
 	}
 	
@@ -66,29 +85,47 @@ public class SortingList<E> implements List<E> {
 	}
 	
 	@Override
-	public boolean addAll(Collection<? extends E> c) {
-		return underlyingList.addAll(c);
+	public boolean addAll(Collection<? extends Integer> c) {
+		for(int e : c) {
+			add(e);
+		}
+		return true;
 	}
 	
 	@Override
-	public boolean addAll(int index, Collection<? extends E> c) {
-		return underlyingList.addAll(index, c);
+	public boolean addAll(int index, Collection<? extends Integer> c) {
+		for(int e : c) {
+			add(index, e);
+			index++; // TODO: make all these functions compliant
+		}
+		return true;
 	}
 	
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		return underlyingList.removeAll(c);
+		boolean changed = false;
+		for(Object e : c) {
+			if(remove(e)) {
+				changed = true;
+			}
+		}
+		return changed;
 	}
 	
 	@Override
 	public boolean retainAll(Collection<?> c) {
+		for(Object e : c) {
+			remove(e);
+		}
 		return underlyingList.retainAll(c);
 	}
 	
 	@Override
 	public void clear() {
-		// TODO: add the thing
-		underlyingList.clear();
+		int size = size();
+		for(int i = 0; i < size; i++) {
+			remove(0);
+		}
 	}
 	
 	@Override
@@ -103,25 +140,59 @@ public class SortingList<E> implements List<E> {
 	}
 	
 	@Override
-	public E get(int index) {
+	public Integer get(int index) {
 		return underlyingList.get(index);
 	}
 	
 	@Override
-	public E set(int index, E element) {
-		// TODO: Add the thing
+	public Integer set(int index, Integer element) {
+		
+		panel.nextOperationLock.lock();
+		try {
+			panel.operationReady.set(true);
+			panel.operation.set(new SortOperation.DirectSetPoint(index, element));
+			
+			panel.continueSortCondition.await();
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		} finally {
+			panel.nextOperationLock.unlock();
+		}
+		
 		return underlyingList.set(index, element);
 	}
 	
 	@Override
-	public void add(int index, E element) {
-		// TODO: Add the thing
+	public void add(int index, Integer element) {
+		panel.nextOperationLock.lock();
+		try {
+			panel.operationReady.set(true);
+			panel.operation.set(new SortOperation.AddPoint(index, element));
+			
+			panel.continueSortCondition.await();
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		} finally {
+			panel.nextOperationLock.unlock();
+		}
+		
 		underlyingList.add(index, element);
 	}
 	
 	@Override
-	public E remove(int index) {
-		// TODO: Add the thing
+	public Integer remove(int index) {
+		panel.nextOperationLock.lock();
+		try {
+			panel.operationReady.set(true);
+			panel.operation.set(new SortOperation.RemovePoint(index));
+			
+			panel.continueSortCondition.await();
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		} finally {
+			panel.nextOperationLock.unlock();
+		}
+		
 		return underlyingList.remove(index);
 	}
 	
@@ -136,17 +207,17 @@ public class SortingList<E> implements List<E> {
 	}
 	
 	@Override
-	public ListIterator<E> listIterator() {
+	public ListIterator<Integer> listIterator() {
 		return underlyingList.listIterator();
 	}
 	
 	@Override
-	public ListIterator<E> listIterator(int index) {
+	public ListIterator<Integer> listIterator(int index) {
 		return underlyingList.listIterator(index);
 	}
 	
 	@Override
-	public List<E> subList(int fromIndex, int toIndex) {
+	public List<Integer> subList(int fromIndex, int toIndex) {
 		return underlyingList.subList(fromIndex, toIndex);
 	}
 }
