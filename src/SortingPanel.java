@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.sql.Array;
 import java.util.*;
 import java.awt.*;
 import java.util.List;
@@ -20,6 +21,8 @@ public class SortingPanel extends JPanel {
 	protected void paintComponent(Graphics graphics) {
 		super.paintComponent(graphics);
 		
+		colorList = new ArrayList<>(dataList.stream().map(i -> Color.gray).toList());
+		
 		if(operationReady.get()) {
 			SortOperation op = operation.get();
 			
@@ -35,6 +38,13 @@ public class SortingPanel extends JPanel {
 				case SortOperation.DirectSetPoint o -> {
 					dataList.set(o.index(), o.value());
 					colorList.set(o.index(), Color.red);
+				}
+				case SortOperation.SwapPoints o -> {
+					int index2item = dataList.get(o.index2());
+					dataList.set(o.index2(), dataList.get(o.index1()));
+					dataList.set(o.index1(), index2item);
+					colorList.set(o.index1(), Color.green);
+					colorList.set(o.index2(), Color.green);
 				}
 				default -> throw new IllegalStateException("Unexpected value: " + op);
 			}

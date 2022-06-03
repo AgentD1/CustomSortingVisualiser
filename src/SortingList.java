@@ -1,12 +1,29 @@
 import java.util.*;
 
-public class SortingList implements List<Integer> {
+public class SortingList implements List<Integer>, RandomAccess {
 	public List<Integer> underlyingList = new ArrayList<>();
 	
 	SortingPanel panel;
 	
 	public SortingList(SortingPanel panel) {
 		this.panel = panel;
+	}
+	
+	public void swap(int index1, int index2) {
+		int index2item = underlyingList.get(index2);
+		underlyingList.set(index2, underlyingList.get(index1));
+		underlyingList.set(index1, index2item);
+		panel.nextOperationLock.lock();
+		try {
+			panel.operationReady.set(true);
+			panel.operation.set(new SortOperation.SwapPoints(index1, index2));
+			
+			panel.continueSortCondition.await();
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		} finally {
+			panel.nextOperationLock.unlock();
+		}
 	}
 	
 	@Override
@@ -114,10 +131,14 @@ public class SortingList implements List<Integer> {
 	
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		for(Object e : c) {
-			remove(e);
+		boolean changed = false;
+		for(Integer i : underlyingList) {
+			if(!c.contains(i)) {
+				remove(i);
+				changed = true;
+			}
 		}
-		return underlyingList.retainAll(c);
+		return changed;
 	}
 	
 	@Override
@@ -208,16 +229,16 @@ public class SortingList implements List<Integer> {
 	
 	@Override
 	public ListIterator<Integer> listIterator() {
-		return underlyingList.listIterator();
+		throw new UnsupportedOperationException("List iterators are not currently supported!");
 	}
 	
 	@Override
 	public ListIterator<Integer> listIterator(int index) {
-		return underlyingList.listIterator(index);
+		throw new UnsupportedOperationException("List iterators are not currently supported!");
 	}
 	
 	@Override
 	public List<Integer> subList(int fromIndex, int toIndex) {
-		return underlyingList.subList(fromIndex, toIndex);
+		throw new UnsupportedOperationException("Sublists are not currently supported!");
 	}
 }
