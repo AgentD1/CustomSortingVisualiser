@@ -23,7 +23,7 @@ public class SortingPanel extends JPanel {
 		
 		colorList = new ArrayList<>(dataList.stream().map(i -> Color.gray).toList());
 		
-		if(operationReady.get()) {
+		if (operationReady.get()) {
 			SortOperation op = operation.get();
 			
 			switch (op) {
@@ -59,25 +59,29 @@ public class SortingPanel extends JPanel {
 			}
 		}
 		
+		if (dataList.size() == 0) return;
+		
 		Graphics2D g = (Graphics2D) graphics;
 		
 		double w = getSize().getWidth();
 		double h = getSize().getHeight();
 		
-		double barWidth = w / dataList.size();
+		double barWidth = (w - 2) / dataList.size();
 		
 		g.setStroke(new BasicStroke(2f));
 		
-		for(int i = 0; i < dataList.size(); i++) {
-			if(barWidth > 2) {
+		double maxHeight = dataList.stream().max(Integer::compareTo).orElseThrow() + 1;
+		
+		for (int i = 0; i < dataList.size(); i++) {
+			if (barWidth > 2) {
 				g.setColor(Color.black);
 			} else {
 				g.setColor(colorList.get(i));
 			}
-			double height = (h - 1) * ((float)dataList.get(i) / dataList.stream().max(Integer::compareTo).orElseThrow());
-			g.drawRect((int) (i * barWidth), (int) (h - height - 1), (int) barWidth, (int) (height - 1));
+			double height = (h - 1) * ((float) dataList.get(i) / maxHeight);
+			g.drawRect((int) (i * barWidth) + 1, (int) (h - height - 1), (int) barWidth, (int) (height - 1));
 			g.setColor(colorList.get(i));
-			g.fillRect((int) (i * barWidth), (int) (h - height - 1), (int) barWidth, (int) (height - 1));
+			g.fillRect((int) (i * barWidth) + 1, (int) (h - height - 1), (int) barWidth, (int) (height - 1));
 		}
 		
 		g.drawString(String.valueOf(dataList.size()), 0, 0);
