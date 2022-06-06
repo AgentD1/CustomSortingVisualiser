@@ -22,7 +22,9 @@ public class SortingList implements List<Integer>, RandomAccess {
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
 		} finally {
-			panel.nextOperationLock.unlock();
+			try {
+				panel.nextOperationLock.unlock();
+			} catch(IllegalMonitorStateException ignored) {}
 		}
 	}
 	
@@ -69,7 +71,9 @@ public class SortingList implements List<Integer>, RandomAccess {
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
 		} finally {
-			panel.nextOperationLock.unlock();
+			try {
+				panel.nextOperationLock.unlock();
+			} catch(IllegalMonitorStateException ignored) {}
 		}
 		
 		underlyingList.add(e);
@@ -90,7 +94,9 @@ public class SortingList implements List<Integer>, RandomAccess {
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
 		} finally {
-			panel.nextOperationLock.unlock();
+			try {
+				panel.nextOperationLock.unlock();
+			} catch(IllegalMonitorStateException ignored) {}
 		}
 		
 		return underlyingList.remove(o);
@@ -177,7 +183,9 @@ public class SortingList implements List<Integer>, RandomAccess {
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
 		} finally {
-			panel.nextOperationLock.unlock();
+			try {
+				panel.nextOperationLock.unlock();
+			} catch(IllegalMonitorStateException ignored) {}
 		}
 		
 		return underlyingList.set(index, element);
@@ -194,7 +202,9 @@ public class SortingList implements List<Integer>, RandomAccess {
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
 		} finally {
-			panel.nextOperationLock.unlock();
+			try {
+				panel.nextOperationLock.unlock();
+			} catch(IllegalMonitorStateException ignored) {}
 		}
 		
 		underlyingList.add(index, element);
@@ -211,7 +221,9 @@ public class SortingList implements List<Integer>, RandomAccess {
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
 		} finally {
-			panel.nextOperationLock.unlock();
+			try {
+				panel.nextOperationLock.unlock();
+			} catch(IllegalMonitorStateException ignored) {}
 		}
 		
 		return underlyingList.remove(index);

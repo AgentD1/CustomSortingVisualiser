@@ -11,12 +11,23 @@ public class Main {
 	static SortingPanel panel;
 	static JPanel rightPane;
 	
+	static Map<String, DataGenerator> dataGenerators;
+	static SortingAlgorithm[] algorithms;
+	static JComboBox<String> chooseAlgorithmBox;
+	static JFormattedTextField dataPointsNumberField;
+	static JComboBox<String> dataGeneratorSelector;
+	static JButton playPauseButton;
+	
+	static SortingList sortingList;
+	static Thread sortingThread;
+	
+	
 	public static void main(String[] args) {
-		SortingAlgorithm[] algorithms = new SortingAlgorithm[] {
+		algorithms = new SortingAlgorithm[] {
 				new BubbleSort(), // If you want to add a new sorting algorithm to the list, add it here like this: new YourClass(),
 		};
 		
-		Map<String, DataGenerator> dataGenerators = Map.of(
+		dataGenerators = Map.of(
 				"Sequential Data", new SequentialDataGenerator(),
 				"Random Data", new RandomDataGenerator()
 		);
@@ -32,7 +43,7 @@ public class Main {
 		
 		frame = new JFrame("Sorting by Jacob");
 		frame.setSize(840, 480);
-		frame.setResizable(true);
+		frame.setResizable(false);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		
@@ -53,7 +64,7 @@ public class Main {
 		rightPane.add(chooseAlgorithmLabel);
 		rightPane.add(Box.createRigidArea(new Dimension(0, 5)));
 		
-		JComboBox<String> chooseAlgorithmBox = new JComboBox<>(Arrays.stream(algorithms).map(a -> a.getClass().getName()).toArray(String[]::new));
+		chooseAlgorithmBox = new JComboBox<>(Arrays.stream(algorithms).map(a -> a.getClass().getName()).toArray(String[]::new));
 		rightPane.add(chooseAlgorithmBox);
 		rightPane.add(Box.createRigidArea(new Dimension(0, 5)));
 		
@@ -66,8 +77,10 @@ public class Main {
 		playButtonsPanel.setLayout(new BoxLayout(playButtonsPanel, BoxLayout.X_AXIS));
 		
 		JButton leftButton = new JButton("⏪");
-		leftButton.addActionListener(System.out::println);
-		JButton playPauseButton = new JButton("⏵"); // ⏸
+		playPauseButton = new JButton("⏸"); //
+		playPauseButton.addActionListener(e -> {
+			panel.playPause();
+		});
 		JButton rightButton = new JButton("⏩");
 		
 		playButtonsPanel.add(leftButton);
@@ -81,6 +94,7 @@ public class Main {
 		rightPane.add(Box.createRigidArea(new Dimension(0, 5)));
 		
 		JButton resetButton = new JButton("Reset");
+		resetButton.addActionListener(e -> panel.reset());
 		rightPane.add(resetButton);
 		rightPane.add(Box.createRigidArea(new Dimension(0, 5)));
 		
@@ -91,7 +105,7 @@ public class Main {
 		JPanel dataPointsNumberPanel = new JPanel();
 		dataPointsNumberPanel.setLayout(new BoxLayout(dataPointsNumberPanel, BoxLayout.X_AXIS));
 		JLabel dataPointsNumberLabel = new JLabel("Number of data points:");
-		JFormattedTextField dataPointsNumberField = new JFormattedTextField(numbersOnlyFormatter);
+		dataPointsNumberField = new JFormattedTextField(numbersOnlyFormatter);
 		dataPointsNumberField.setValue(100);
 		dataPointsNumberPanel.add(dataPointsNumberLabel);
 		dataPointsNumberPanel.add(Box.createRigidArea(new Dimension(5, 0)));
@@ -104,14 +118,11 @@ public class Main {
 		dataGeneratorPanel.setLayout(new BoxLayout(dataGeneratorPanel, BoxLayout.X_AXIS));
 		JLabel dataGeneratorLabel = new JLabel("Data format:");
 		dataGeneratorPanel.add(dataGeneratorLabel);
-		JComboBox<String> dataGeneratorSelector = new JComboBox<>(dataGenerators.keySet().toArray(new String[0]));
+		dataGeneratorSelector = new JComboBox<>(dataGenerators.keySet().toArray(new String[0]));
 		dataGeneratorPanel.add(Box.createRigidArea(new Dimension(5, 0)));
 		dataGeneratorPanel.add(dataGeneratorSelector);
 		rightPane.add(dataGeneratorPanel);
 		rightPane.add(Box.createRigidArea(new Dimension(0, 5)));
-		
-		Thread.currentThread().stop();
-		
 		
 		rightPane.add(Box.createVerticalGlue());
 		
@@ -124,7 +135,7 @@ public class Main {
 		Timer timer = new Timer((int) (1000.0 / 60.0), e -> frame.repaint());
 		timer.start();
 		
-		new Thread(() -> {
+		sortingThread = new Thread(() -> {
 			List<Integer> list = new SortingList(panel);
 			
 			for (int i = 1; i < 100; i++) {
@@ -135,7 +146,8 @@ public class Main {
 			
 			SortingAlgorithm algorithm = new BubbleSort();
 			algorithm.sort(list);
-		}).start();
+		});
+		sortingThread.start();
 	}
 	
 	interface DataGenerator {
@@ -146,9 +158,10 @@ public class Main {
 		@Override
 		public List<Integer> data(int num) {
 			List<Integer> list = new ArrayList<>();
-			for (int i = 0; i < num; i++) {
+			for (int i = 1; i <= num; i++) {
 				list.add(i);
 			}
+			Collections.shuffle(list);
 			return list;
 		}
 	}
@@ -159,8 +172,9 @@ public class Main {
 			Random random = new Random();
 			List<Integer> list = new ArrayList<>();
 			for (int i = 0; i < num; i++) {
-				list.add(random.nextInt());
+				list.add(Math.abs(random.nextInt()));
 			}
+			Collections.shuffle(list);
 			return list;
 		}
 	}
