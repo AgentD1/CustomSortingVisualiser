@@ -125,12 +125,12 @@ public class SortingPanel extends JPanel {
 	}
 	
 	public void play() {
-		Main.playPauseButton.setText("⏵");
+		Main.playPauseButton.setText("⏸");
 		paused = false;
 	}
 	
 	public void pause() {
-		Main.playPauseButton.setText("⏸");
+		Main.playPauseButton.setText("⏵");
 		paused = true;
 	}
 }
