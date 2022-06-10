@@ -1,3 +1,4 @@
+import javax.swing.*;
 import javax.tools.*;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -14,7 +15,11 @@ public class CodeLoader {
 		Pattern namePattern = Pattern.compile(".*public class (.*?) implements SortingAlgorithm *\\{.*");
 		
 		Matcher matcher = namePattern.matcher(code);
-		matcher.find();
+		boolean nameFound = matcher.find();
+		
+		if(!nameFound) {
+			JOptionPane.show
+		}
 		
 		String name = matcher.group(1);
 		
@@ -45,8 +50,11 @@ public class CodeLoader {
 				
 				return loadedAlgorithm;
 			} catch (ClassNotFoundException | IllegalAccessException | MalformedURLException | InstantiationException e) {
+				
 				e.printStackTrace();
 			}
+		} else {
+			// JOptionPane error = JOptionPane.showMessageDialog(null, );
 		}
 		
 		return null;
