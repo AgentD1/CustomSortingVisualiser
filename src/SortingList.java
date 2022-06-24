@@ -18,6 +18,10 @@ public class SortingList implements List<Integer>, RandomAccess {
 			panel.operationReady.set(true);
 			panel.operation.set(new SortOperation.SwapPoints(index1, index2));
 			
+			synchronized (panel.operationReadySync) {
+				panel.operationReadySync.notifyAll();
+			}
+			
 			panel.continueSortCondition.await();
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
@@ -65,7 +69,11 @@ public class SortingList implements List<Integer>, RandomAccess {
 		panel.nextOperationLock.lock();
 		try {
 			panel.operationReady.set(true);
-			panel.operation.set(new SortOperation.AddPoint(underlyingList.size(), (int)e));
+			panel.operation.set(new SortOperation.AddPoint(underlyingList.size(), (int) e));
+			
+			synchronized (panel.operationReadySync) {
+				panel.operationReadySync.notifyAll();
+			}
 			
 			panel.continueSortCondition.await();
 		} catch (InterruptedException ex) {
@@ -83,12 +91,16 @@ public class SortingList implements List<Integer>, RandomAccess {
 	@Override
 	public boolean remove(Object o) {
 		int index = underlyingList.indexOf(o);
-		if(index == -1) return false;
+		if (index == -1) return false;
 		
 		panel.nextOperationLock.lock();
 		try {
 			panel.operationReady.set(true);
 			panel.operation.set(new SortOperation.RemovePoint(index));
+			
+			synchronized (panel.operationReadySync) {
+				panel.operationReadySync.notifyAll();
+			}
 			
 			panel.continueSortCondition.await();
 		} catch (InterruptedException ex) {
@@ -109,7 +121,7 @@ public class SortingList implements List<Integer>, RandomAccess {
 	
 	@Override
 	public boolean addAll(Collection<? extends Integer> c) {
-		for(int e : c) {
+		for (int e : c) {
 			add(e);
 		}
 		return true;
@@ -117,7 +129,7 @@ public class SortingList implements List<Integer>, RandomAccess {
 	
 	@Override
 	public boolean addAll(int index, Collection<? extends Integer> c) {
-		for(int e : c) {
+		for (int e : c) {
 			add(index, e);
 			index++; // TODO: make all these functions compliant
 		}
@@ -127,8 +139,8 @@ public class SortingList implements List<Integer>, RandomAccess {
 	@Override
 	public boolean removeAll(Collection<?> c) {
 		boolean changed = false;
-		for(Object e : c) {
-			if(remove(e)) {
+		for (Object e : c) {
+			if (remove(e)) {
 				changed = true;
 			}
 		}
@@ -138,8 +150,8 @@ public class SortingList implements List<Integer>, RandomAccess {
 	@Override
 	public boolean retainAll(Collection<?> c) {
 		boolean changed = false;
-		for(Integer i : underlyingList) {
-			if(!c.contains(i)) {
+		for (Integer i : underlyingList) {
+			if (!c.contains(i)) {
 				remove(i);
 				changed = true;
 			}
@@ -150,14 +162,14 @@ public class SortingList implements List<Integer>, RandomAccess {
 	@Override
 	public void clear() {
 		int size = size();
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			remove(0);
 		}
 	}
 	
 	@Override
 	public boolean equals(Object o) {
-		if(!o.getClass().equals(getClass())) return false;
+		if (!o.getClass().equals(getClass())) return false;
 		return underlyingList.equals(o);
 	}
 	
@@ -179,6 +191,10 @@ public class SortingList implements List<Integer>, RandomAccess {
 			panel.operationReady.set(true);
 			panel.operation.set(new SortOperation.DirectSetPoint(index, element));
 			
+			synchronized (panel.operationReadySync) {
+				panel.operationReadySync.notifyAll();
+			}
+			
 			panel.continueSortCondition.await();
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
@@ -198,6 +214,10 @@ public class SortingList implements List<Integer>, RandomAccess {
 			panel.operationReady.set(true);
 			panel.operation.set(new SortOperation.AddPoint(index, element));
 			
+			synchronized (panel.operationReadySync) {
+				panel.operationReadySync.notifyAll();
+			}
+			
 			panel.continueSortCondition.await();
 		} catch (InterruptedException ex) {
 			ex.printStackTrace();
@@ -216,6 +236,10 @@ public class SortingList implements List<Integer>, RandomAccess {
 		try {
 			panel.operationReady.set(true);
 			panel.operation.set(new SortOperation.RemovePoint(index));
+			
+			synchronized (panel.operationReadySync) {
+				panel.operationReadySync.notifyAll();
+			}
 			
 			panel.continueSortCondition.await();
 		} catch (InterruptedException ex) {

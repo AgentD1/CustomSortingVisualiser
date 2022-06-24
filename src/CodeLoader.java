@@ -16,10 +16,10 @@ public class CodeLoader {
 		
 		Matcher matcher = namePattern.matcher(code);
 		boolean nameFound = matcher.find();
-		
-		if(!nameFound) {
-			JOptionPane.show
-		}
+
+//		if(!nameFound) {
+//			JOptionPane.show
+//		}
 		
 		String name = matcher.group(1);
 		
@@ -49,7 +49,8 @@ public class CodeLoader {
 				SortingAlgorithm loadedAlgorithm = (SortingAlgorithm) Class.forName(name, true, classLoader).newInstance();
 				
 				return loadedAlgorithm;
-			} catch (ClassNotFoundException | IllegalAccessException | MalformedURLException | InstantiationException e) {
+			} catch (ClassNotFoundException | IllegalAccessException | MalformedURLException |
+			         InstantiationException e) {
 				
 				e.printStackTrace();
 			}
